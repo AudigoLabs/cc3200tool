@@ -1,4 +1,4 @@
-# CC3200 Tool
+# CC3200 / CC3220 Tool
 
 A small tool to write files in TI's CC3200 SimpleLink (TM) filesystem.
 
@@ -82,3 +82,7 @@ of arguments. Some examples:
             ../servicepack-ota/ota_1.0.1.6-2.6.0.5.ucf.ucf /sys/servicepack.ucf \
         write_file ../application_bootloader/gcc/exe/application_bootloader.bin /sys/mcuimg.bin \
         write_file yourapp.bin /sys/mcuimg1.bin
+        
+   # flash UCF image to CC3220
+   cc3220tool /dev/ttyS0 --reset write_flash ./DBV4_1_23_20_MfgImage_Programming.ucf
+   
