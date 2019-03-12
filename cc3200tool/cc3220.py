@@ -231,6 +231,14 @@ class CC3x00VersionInfo(object):
             self.bootloader, self.nwp, self.mac, self.phy, self.chip_type)
 
 
+class ChargingBar(Bar):
+    suffix = '%(percent)d%%'
+    bar_prefix = ' '
+    bar_suffix = ' '
+    empty_fill = '.'
+    fill = 'X'
+
+
 class CC3x00StorageList(object):
     FLASH_BIT = 0x02
     SFLASH_BIT = 0x04
@@ -768,7 +776,7 @@ class CC3200Connection(object):
             key_data = key.read()[:key_size]
         sent = 0
 
-        with Bar('Flashing', max=data_len / chunk_size) as bar:
+        with ChargingBar('Flashing', max_value=data_len / chunk_size) as bar:
             while sent < data_len:
                 chunk = data[sent: sent + chunk_size]
                 status = self._fs_programming(flags, chunk, key_data)
