@@ -3,8 +3,8 @@ import setuptools
 
 setup(
     name="cc3200tool",
-    version="0.1.0",
-    description="A tool to upload files to TI CC3200 ",
+    version="0.2.0",
+    description="A tool to upload files to TI CC32xx ",
     author="Kiril Zyapkov",
     author_email="k.zyapkov@allterco.com",
     url="http://github.com/s1ider/cc3200tool.git",
