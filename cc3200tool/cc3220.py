@@ -559,7 +559,7 @@ class CC3200Connection(object):
             raise CC3200Error("closing file failed")
 
     def connect(self):
-        log.info("Connecting to f target...")
+        log.info("Connecting to target...")
         self.port.reset_input_buffer()
         self.port.reset_output_buffer()
         self._set_sop2(True)
