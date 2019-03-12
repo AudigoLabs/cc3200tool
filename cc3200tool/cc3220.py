@@ -28,14 +28,13 @@ from contextlib import contextmanager
 from pkgutil import get_data
 
 import serial
-from progress.bar import ChargingBar
+from progress.bar import Bar
 
 log = logging.getLogger()
 logging.basicConfig(stream=sys.stderr, level=logging.INFO,
                     format="%(asctime)-15s -- %(message)s")
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
-# CC3200_BAUD = 115200
 CC3200_BAUD = 921600
 
 OPCODE_START_UPLOAD = "\x21"
@@ -769,12 +768,12 @@ class CC3200Connection(object):
             key_data = key.read()[:key_size]
         sent = 0
 
-        with ChargingBar('Processing', max=20) as bar:
+        with Bar('Flashing', max=20) as bar:
             while sent < data_len:
                 chunk = data[sent: sent + chunk_size]
                 status = self._fs_programming(flags, chunk, key_data)
                 # assert (len(chunk) == chunk_size and status == sent) or status == 0
-                log.info('FS programming chunk %d:%d, status %d', sent, len(chunk), status)
+                # log.info('FS programming chunk %d:%d, status %d', sent, len(chunk), status)
                 sent += len(chunk)
                 bar.next()
             if data_len % chunk_size == 0:
