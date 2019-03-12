@@ -9,6 +9,6 @@ setup(
     url="http://github.com/allterco/cc3200tool",
     packages=['cc3200tool'],
     package_data={'cc3200tool': ['dll/*.dll']},
-    scripts=['scripts/cc3200tool'],
-    install_requires=['pyserial'],
+    scripts=['scripts/cc3200tool', 'scripts/cc3220tool'],
+    install_requires=['pyserial', 'progress'],
 )
