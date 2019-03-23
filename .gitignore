@@ -1,3 +1,4 @@
-env/
+venv/
 *.py[c|o]
 *.egg-info/
+.idea/

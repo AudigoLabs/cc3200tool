@@ -9,7 +9,8 @@ setup(
     author_email="k.zyapkov@allterco.com",
     url="http://github.com/s1ider/cc3200tool.git",
     packages=setuptools.find_packages(),
-    package_data={'cc3200tool': ['dll/*.dll', 'dll/gen2/*.ptc']},
+    package_data={'cc3200tool': ['dll/*.dll'],
+                  'cc3220tool': ['dll/gen2/*.ptc']},
     scripts=[
                 'scripts/cc3200tool',
                 'scripts/cc3220tool',
