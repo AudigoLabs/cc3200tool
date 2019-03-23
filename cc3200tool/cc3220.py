@@ -115,7 +115,7 @@ def auto_int(x):
 
 
 # TODO: replace argparse.FileType('rb') with manual file handling
-parser = argparse.ArgumentParser(description='Serial flash utility for CC3200')
+parser = argparse.ArgumentParser(description='Serial flash utility for CC3220')
 
 parser.add_argument(
     "-p", "--port", type=str, default="/dev/ttyUSB0",
