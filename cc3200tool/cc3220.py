@@ -31,7 +31,7 @@ import serial
 from progress.bar import Bar
 
 log = logging.getLogger()
-logging.basicConfig(stream=sys.stderr, level=logging.INFO,
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)-15s -- %(message)s")
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -787,7 +787,7 @@ class CC3200Connection(object):
             if data_len % chunk_size == 0:
                 status = self._fs_programming(flags, '', '')
                 log.info('FS programming status %d', status)
-                # assert status == 0
+                assert status == 0
 
 
 def split_argv(cmdline_args):

@@ -31,7 +31,7 @@ from collections import namedtuple
 import serial
 
 log = logging.getLogger()
-logging.basicConfig(stream=sys.stderr, level=logging.INFO,
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format="%(asctime)-15s -- %(message)s")
 
 CC3200_BAUD = 921600
