@@ -409,6 +409,11 @@ class CC3200Connection(object):
         len_blob = struct.pack(">H", len(data) + 2)
         csum = struct.pack("B", checksum & 0xff)
         self.port.write(len_blob + csum + data)
+        if sys.platform.lower()[:6] == 'darwin':
+            # pyserial doesn't actually wait for the write to complete,
+            # and if we try to read while it's writing, it sometimes
+            # corrupts the data, so just do a manual sleep
+            time.sleep(len(data) / 10000)
         if not self._read_ack(timeout):
             raise CC3200Error(
                 "No ack for packet opcode=0x{:02x}".format(data[0]))
@@ -424,9 +429,19 @@ class CC3200Connection(object):
 
     def _do_break(self, timeout, duration):
         # self.port.send_break(duration)
-        self.port.break_condition = True
+        if sys.platform.lower()[:6] == 'darwin':
+            # pyserial has a bug in OS X, so just issue the ioctl directly
+            import fcntl
+            fcntl.ioctl(self.port.fd, 0x2000747b)
+        else:
+            self.port.break_condition = True
         time.sleep(duration)
-        self.port.break_condition = False
+        if sys.platform.lower()[:6] == 'darwin':
+            # pyserial has a bug in OS X, so just issue the ioctl directly
+            import fcntl
+            fcntl.ioctl(self.port.fd, 0x2000747a)
+        else:
+            self.port.break_condition = False
         return self._read_ack(timeout)
 
     def _try_breaking(self, tries=5, timeout=2, duration=1.5):
