@@ -4,7 +4,7 @@ import setuptools
 setup(
     name="cc3220tool",
     version="0.2.0",
-    description="A tool to upload files to TI CC3220 ",
+    description="A tool to upload files to TI CC3220",
     author="Kiril Zyapkov",
     author_email="k.zyapkov@allterco.com",
     url="https://github.com/AudigoLabs/cc3200tool",
