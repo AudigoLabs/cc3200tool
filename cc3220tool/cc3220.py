@@ -28,6 +28,7 @@ from contextlib import contextmanager
 from pkgutil import get_data
 
 import serial
+import serial.tools.list_ports
 from progress.bar import Bar
 
 log = logging.getLogger()
@@ -852,8 +853,23 @@ def main():
             port_name, baudrate=CC3200_BAUD, parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE)
     except (Exception,) as e:
-        log.warn("unable to open serial port %s: %s", port_name, e)
-        sys.exit(-2)
+        possible_ports = []
+        for port in serial.tools.list_ports.comports():
+            if port.vid == 0x403:
+                # This is an FTDI device, so might be it
+                possible_ports += [port]
+        if len(possible_ports) == 1:
+            try:
+                port_name = possible_ports[0].device
+                p = serial.Serial(
+                    port_name, baudrate=CC3200_BAUD, parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_ONE)
+            except:
+                log.warn("unable to open serial port %s: %s", port_name, e)
+                sys.exit(-2)
+        else:
+            log.warn("unable to open serial port %s: %s", port_name, e)
+            sys.exit(-2)
 
     cc = CC3200Connection(p, reset_method, sop2_method)
     try:
