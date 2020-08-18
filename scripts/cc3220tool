@@ -18,5 +18,5 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-from cc3200tool.cc3220 import main
+from cc3220tool.cc3220 import main
 main()

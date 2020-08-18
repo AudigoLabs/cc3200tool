@@ -167,7 +167,7 @@ parser_write_flash.add_argument(
 
 
 def dll_data(fname):
-    return get_data('cc3200tool', os.path.join('dll', fname))
+    return get_data('cc3220tool', os.path.join('dll', fname))
 
 
 class CC3200Error(Exception):

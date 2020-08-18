@@ -179,7 +179,7 @@ def load_file(fname):
 
 
 def dll_data(fname):
-    return get_data('cc3200tool', 'dll/{}'.format(fname))
+    return get_data('cc3220tool', 'dll/{}'.format(fname))
 
 
 class CC3200Error(Exception):
