@@ -37,22 +37,22 @@ CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 CC3200_BAUD = 921600
 
-OPCODE_START_UPLOAD = "\x21"
-OPCODE_FINISH_UPLOAD = "\x22"
-OPCODE_GET_LAST_STATUS = "\x23"
-OPCODE_FILE_CHUNK = "\x24"
-OPCODE_GET_STORAGE_LIST = "\x27"
-OPCODE_FORMAT_FLASH = "\x28"
-OPCODE_GET_FILE_INFO = "\x2A"
-OPCODE_READ_FILE_CHUNK = "\x2B"
-OPCODE_RAW_STORAGE_WRITE = "\x2D"
-OPCODE_ERASE_FILE = "\x2E"
-OPCODE_GET_VERSION_INFO = "\x2F"
-OPCODE_RAW_STORAGE_ERASE = "\x30"
-OPCODE_GET_STORAGE_INFO = "\x31"
-OPCODE_EXEC_FROM_RAM = "\x32"
-OPCODE_SWITCH_2_APPS = "\x33"
-OPCODE_FS_PROGRAMMING = "\x34"
+OPCODE_START_UPLOAD = b"\x21"
+OPCODE_FINISH_UPLOAD = b"\x22"
+OPCODE_GET_LAST_STATUS = b"\x23"
+OPCODE_FILE_CHUNK = b"\x24"
+OPCODE_GET_STORAGE_LIST = b"\x27"
+OPCODE_FORMAT_FLASH = b"\x28"
+OPCODE_GET_FILE_INFO = b"\x2A"
+OPCODE_READ_FILE_CHUNK = b"\x2B"
+OPCODE_RAW_STORAGE_WRITE = b"\x2D"
+OPCODE_ERASE_FILE = b"\x2E"
+OPCODE_GET_VERSION_INFO = b"\x2F"
+OPCODE_RAW_STORAGE_ERASE = b"\x30"
+OPCODE_GET_STORAGE_INFO = b"\x31"
+OPCODE_EXEC_FROM_RAM = b"\x32"
+OPCODE_SWITCH_2_APPS = b"\x33"
+OPCODE_FS_PROGRAMMING = b"\x34"
 
 FLASH_BLOCK_SIZES = [0x100, 0x400, 0x1000, 0x4000, 0x10000]
 
@@ -85,7 +85,7 @@ SLFS_MODE_OPEN_WRITE_CREATE_IF_NOT_EXIST = 3
 def hexify(s):
     ret = []
     for x in s:
-        ret.append(hex(ord(x)))
+        ret.append(hex(x))
     return " ".join(ret)
 
 
@@ -172,7 +172,7 @@ parser_write_flash.add_argument(
 
 
 def load_file(fname):
-    with open(fname, 'r') as f:
+    with open(fname, 'rb') as f:
         data = f.read()
         assert len(data) > 0
     return data
@@ -219,11 +219,11 @@ class CC3x00VersionInfo(object):
 
     @classmethod
     def from_packet(cls, data):
-        bootloader = tuple(map(ord, data[0:4]))
-        nwp = tuple(map(ord, data[4:8]))
-        mac = tuple(map(ord, data[8:12]))
-        phy = tuple(map(ord, data[12:16]))
-        chip_type = tuple(map(ord, data[16:20]))
+        bootloader = tuple(data[0:4])
+        nwp = tuple(data[4:8])
+        mac = tuple(data[8:12])
+        phy = tuple(data[12:16])
+        chip_type = tuple(data[16:20])
         return cls(bootloader, nwp, mac, phy, chip_type)
 
     def __repr__(self):
@@ -284,7 +284,7 @@ class CC3x00Status(object):
 
     @property
     def is_ok(self):
-        return self.value == 0x40
+        return self.value == b'\x40'
 
     @classmethod
     def from_packet(cls, packet):
@@ -298,7 +298,7 @@ class CC3x00FileInfo(object):
 
     @classmethod
     def from_packet(cls, data):
-        exists = data[0] == '\x01'
+        exists = data[0] == b'\x01'
         size = struct.unpack(">I", data[4:8])[0]
         return cls(exists, size)
 
@@ -348,7 +348,7 @@ class CC3200Connection(object):
 
         if self._reset.pin == "prompt":
             print("Reset the device with SOP2 asserted and press Enter")
-            raw_input()
+            input()
             return
 
         in_reset = True ^ self._reset.invert
@@ -373,7 +373,7 @@ class CC3200Connection(object):
                 ack_bytes.append(b)
                 if len(ack_bytes) > 2:
                     ack_bytes.pop(0)
-                if ack_bytes == ['\x00', '\xCC']:
+                if ack_bytes == [b'\x00', b'\xCC']:
                     return True
 
     def _read_packet(self, timeout=None):
@@ -393,9 +393,9 @@ class CC3200Connection(object):
 
         ccsum = 0
         for x in data:
-            ccsum += ord(x)
+            ccsum += x
         ccsum = ccsum & 0xff
-        if ccsum != ord(csum_byte):
+        if ccsum != csum_byte:
             raise CC3200Error("rx csum failed")
 
         self._send_ack()
@@ -405,22 +405,22 @@ class CC3200Connection(object):
         assert len(data)
         checksum = 0
         for b in data:
-            checksum += ord(b)
+            checksum += b
         len_blob = struct.pack(">H", len(data) + 2)
         csum = struct.pack("B", checksum & 0xff)
         self.port.write(len_blob + csum + data)
         if not self._read_ack(timeout):
             raise CC3200Error(
-                "No ack for packet opcode=0x{:02x}".format(ord(data[0])))
+                "No ack for packet opcode=0x{:02x}".format(data[0]))
 
     def _send_ack(self):
-        self.port.write('\x00\xCC')
+        self.port.write(b'\x00\xCC')
 
     def _get_last_status(self):
         self._send_packet(OPCODE_GET_LAST_STATUS)
         status = self._read_packet()
         log.debug("get last status got %s", hexify(status))
-        return CC3x00Status(ord(status))
+        return CC3x00Status(status)
 
     def _do_break(self, timeout, duration):
         # self.port.send_break(duration)
@@ -461,7 +461,7 @@ class CC3200Connection(object):
             raise CC3200Error("getting storage info got {} bytes"
                               .format(len(sinfo)))
         log.info("storage info bytes: %s", ", "
-                 .join([hex(ord(x)) for x in sinfo]))
+                 .join([hex(x) for x in sinfo]))
         return CC3x00StorageInfo.from_packet(sinfo)
 
     def _erase_blocks(self, start, count, storage_id=0):
@@ -474,7 +474,7 @@ class CC3200Connection(object):
                   struct.pack(">III", storage_id, offset, len(data))
         self._send_packet(command + data)
 
-    def _fs_programming(self, flags, chunk, key=''):
+    def _fs_programming(self, flags, chunk, key=b''):
         command = OPCODE_FS_PROGRAMMING + \
                   struct.pack(">HHI", len(key), len(chunk), flags)
         # log.info('FS programming header: %s', hexify(command + key))
@@ -483,7 +483,7 @@ class CC3200Connection(object):
         assert len(response) == 4
         status = 0
         for b in response:
-            status = (status << 8) + ord(b)
+            status = (status << 8) + b
         # log.info('FS programming request: %d, response %s: %d', len(chunk), hexify(response), status)
         return status
 
@@ -545,7 +545,7 @@ class CC3200Connection(object):
 
     def _open_file(self, filename, slfs_flags):
         command = OPCODE_START_UPLOAD + struct.pack(">II", slfs_flags, 0) + \
-                  filename + '\x00\x00'
+                  filename + b'\x00\x00'
         self._send_packet(command)
 
         token = self.port.read(4)
@@ -554,13 +554,13 @@ class CC3200Connection(object):
 
     def _close_file(self, signature=None):
         if signature is None:
-            signature = '\x46' * 256
+            signature = b'\x46' * 256
         if len(signature) != 256:
             raise CC3200Error("bad signature length")
         command = OPCODE_FINISH_UPLOAD
-        command += '\x00' * 63
+        command += b'\x00' * 63
         command += signature
-        command += '\x00'
+        command += b'\x00'
         self._send_packet(command)
         s = self._get_last_status()
         if not s.is_ok:
@@ -681,7 +681,7 @@ class CC3200Connection(object):
 
         log.info("Erasing file %s...", filename)
         command = (OPCODE_ERASE_FILE + struct.pack(">I", 0) +
-                   filename + '\x00')
+                   filename + b'\x00')
         self._send_packet(command)
         s = self._get_last_status()
         if not s.is_ok:
@@ -769,14 +769,14 @@ class CC3200Connection(object):
         log.info('flash image size: %d', data_len)
 
         flags = 0
-        key_data = ''
+        key_data = b''
         chunk_size = 4096
         if key:
             key_size = 16
             key_data = key.read()[:key_size]
         sent = 0
 
-        with ChargingBar('Flashing', max_value=data_len / chunk_size) as bar:
+        with ChargingBar('Flashing', max=data_len / chunk_size) as bar:
             while sent < data_len:
                 chunk = data[sent: sent + chunk_size]
                 status = self._fs_programming(flags, chunk, key_data)
@@ -785,7 +785,7 @@ class CC3200Connection(object):
                 sent += len(chunk)
                 bar.next()
             if data_len % chunk_size == 0:
-                status = self._fs_programming(flags, '', '')
+                status = self._fs_programming(flags, b'', b'')
                 log.info('FS programming status %d', status)
                 assert status == 0
 

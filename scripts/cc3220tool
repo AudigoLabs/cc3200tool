@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/env python3
 #
 # cc3200tool - work with TI's CC3200 SimpleLink (TM) filesystem.
 # Copyright (C) 2016 Allterco Robotics
