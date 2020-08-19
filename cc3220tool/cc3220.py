@@ -531,7 +531,7 @@ class CC3200Connection(object):
     def _get_file_info(self, filename):
         command = OPCODE_GET_FILE_INFO \
                   + struct.pack(">I", len(filename)) \
-                  + filename
+                  + filename.encode("utf-8")
         self._send_packet(command)
         finfo = self._read_packet()
         if len(finfo) < 5:
